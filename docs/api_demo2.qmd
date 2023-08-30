@@ -1,0 +1,72 @@
+---
+title: "api_demo"
+format: html
+editor: visual
+---
+
+```{r}
+library(dataRetrieval)
+library(tidyverse)
+library(metajam)
+```
+
+## Exercise 1
+
+```{r}
+siteNumber <- "11118500"
+parameterCd <- "00060" # Discharge
+startDate <- "2023-08-19"
+endDate <- "2023-08-22"
+
+discharge <- readNWISdv(siteNumber, parameterCd, startDate, endDate)
+```
+
+```{r}
+ggplot(data = discharge, aes(x = Date, y = X_00060_00003 )) + geom_col(fill = "blue")
+```
+
+## Exercise 2
+
+Download the data from dataOne API
+
+```{r}
+url <- "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3A7fc6f6db-c5ea-426a-a743-1f2edafb43b8"
+
+local_path <- "."
+
+metajam::download_d1_data(url, local_path)
+```
+
+#Reading csv in R
+
+```{r}
+ak_household_data <-
+metajam::read_d1_files("doi_10.5063_F1N58JPP__household_language__csv/")
+```
+
+```{r}
+data <- ak_household_data$data
+```
+
+```{#{r}
+#data2 <- data$speak_only_english
+```
+
+Compute percentage
+
+```{r}
+data_percent <- data %>%
+  filter(Year %in% c(2009:2015)) %>%  
+  group_by(Year) %>%
+  summarise(only_english_percent = sum(speak_only_english)/sum(total))
+              
+data_percent2 <- data %>%
+  mutate(only_english_percent = speak_only_english/total) %>%
+  filter(Year %in% c(2009:2015)) %>% 
+  mean(speak_only_english, na.rm = TRUE) 
+
+min(data_percent$Year)
+max(data_percent$Year)
+
+names(data_percent)
+```
